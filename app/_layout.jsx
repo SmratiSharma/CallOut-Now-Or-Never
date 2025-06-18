@@ -9,10 +9,10 @@ export default function RootLayout() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        await account.get(); // checks if user is logged in
-        router.replace("/(tabs)"); // go to home screen
-      } catch (error) {
-        router.replace("/"); // show landing screen
+        await account.get(); // user is logged in
+        router.replace("/home"); // navigate to home (tabs/index.jsx)
+      } catch {
+        router.replace("/"); // go to landing page (index.jsx)
       } finally {
         setCheckingAuth(false);
       }
@@ -21,7 +21,5 @@ export default function RootLayout() {
     checkAuth();
   }, []);
 
-  if (checkingAuth) return null; // OR a splash screen loader
-
-  return <Slot />; // Render children
+  return <Slot />;
 }

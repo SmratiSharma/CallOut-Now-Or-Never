@@ -8,7 +8,7 @@ export default function LandingScreen() {
     <View style={styles.container}>
       {/* Logo */}
       <Image
-        // source={require("../assets/logo.png")} // replace with your logo path
+        source={require("../assets/logo.png")}
         style={styles.logo}
         resizeMode="contain"
       />
@@ -34,6 +34,7 @@ export default function LandingScreen() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
