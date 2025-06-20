@@ -24,13 +24,32 @@ export default function TabsLayout() {
   if (checking) return null; // You can add a loader here
 
   return (
-    <Tabs>
+    <Tabs
+      screenOptions={{
+        tabBarStyle: {
+          paddingTop: 10,
+          height: 80,
+          // backgroundColor: "4CAF50",
+        },
+        tabBarActiveTintColor: "pink",
+      }}
+    >
       <Tabs.Screen
         name="home"
         options={{
           tabBarLabel: "Home",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="contacts"
+        options={{
+          tabBarLabel: "Contacts",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="book" color={color} size={size} />
           ),
         }}
       />

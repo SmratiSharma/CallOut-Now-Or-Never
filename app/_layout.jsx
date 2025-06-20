@@ -1,6 +1,7 @@
 import { Slot, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { account } from "../lib/appwriteConfig";
+import { ContactsProvider } from "./context/ContactsContext";
 
 export default function RootLayout() {
   const router = useRouter();
@@ -21,5 +22,9 @@ export default function RootLayout() {
     checkAuth();
   }, []);
 
-  return <Slot />;
+  return (
+    <ContactsProvider>
+      <Slot />
+    </ContactsProvider>
+  );
 }

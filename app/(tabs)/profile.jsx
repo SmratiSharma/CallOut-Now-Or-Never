@@ -1,4 +1,5 @@
 import { router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -8,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { account } from "../../lib/appwriteConfig";
 
 export default function ProfileScreen() {
@@ -41,35 +43,38 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Avatar */}
-      <Image
-        source={require("../../assets/avatar.jpg")} // Add your image in assets
-        style={styles.avatar}
-      />
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }} edges={["top"]}>
+      <StatusBar style="dark" backgroundColor="#fff" />
+      <View style={styles.container}>
+        {/* Avatar */}
+        <Image
+          source={require("../../assets/avatar.jpg")} // Add your image in assets
+          style={styles.avatar}
+        />
 
-      {/* Name & Email */}
-      {user && (
-        <>
-          <Text style={styles.name}>{user.name}</Text>
-          <Text style={styles.email}>{user.email}</Text>
-        </>
-      )}
+        {/* Name & Email */}
+        {user && (
+          <>
+            <Text style={styles.name}>{user.name}</Text>
+            <Text style={styles.email}>{user.email}</Text>
+          </>
+        )}
 
-      {/* Options List */}
-      <View style={styles.listContainer}>
-        {options.map((option, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.optionItem}
-            onPress={option.onPress} // use individual onPress handler
-          >
-            <Text style={styles.optionText}>{option.title}</Text>
-            <View style={styles.separator}></View>
-          </TouchableOpacity>
-        ))}
+        {/* Options List */}
+        <View style={styles.listContainer}>
+          {options.map((option, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.optionItem}
+              onPress={option.onPress} // use individual onPress handler
+            >
+              <Text style={styles.optionText}>{option.title}</Text>
+              <View style={styles.separator}></View>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({

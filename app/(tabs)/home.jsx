@@ -1,20 +1,17 @@
-// app/(tabs)/home.jsx
-
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
+import * as SMS from "expo-sms";
+import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useContacts } from "../context/ContactsContext"; // path may vary
 
 export default function HomeScreen() {
   const [location, setLocation] = useState(null);
+  const [address, setAddress] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+  const { selectedContacts, setSelectedContacts, saveContacts } = useContacts();
   const router = useRouter();
 
   useEffect(() => {
@@ -25,46 +22,85 @@ export default function HomeScreen() {
         return;
       }
 
-      let loc = await Location.getCurrentPositionAsync({});
-      setLocation(loc.coords);
+      let locationData = await Location.getCurrentPositionAsync({});
+      setLocation(locationData.coords);
+
+      // Reverse Geocoding
+      let addressData = await Location.reverseGeocodeAsync(locationData.coords);
+      if (addressData.length > 0) {
+        const { name, street, city, district } = addressData[0];
+        setAddress(`${name || street}, ${district || city}`);
+      }
     })();
   }, []);
 
-  const handleSOSPress = () => {
-    Alert.alert("🚨 SOS Alert Sent!", "Help is on the way.");
-    // Add logic later for notifying contacts, nearby users, etc.
+  const handleSOS = async () => {
+    // 1. Ask for location permission
+    const { status } = await Location.requestForegroundPermissionsAsync();
+
+    if (status !== "granted") {
+      alert("Permission to access location was denied");
+      return;
+    }
+
+    // 2. Get current location
+    const location = await Location.getCurrentPositionAsync({});
+    if (!location) {
+      alert("Location not ready yet");
+      return;
+    }
+    const { latitude, longitude } = location.coords;
+    const mapLink = `https://maps.google.com/?q=${latitude},${longitude}`;
+
+    // 3. Prepare message
+    const message = `🚨 EMERGENCY ALERT 🚨\nPlease help me. Here's my live location:\n${mapLink}`;
+
+    // 4. Extract phone numbers from selectedContacts
+    const numbers = selectedContacts
+      .map((contact) => contact.phoneNumbers?.[0]?.number)
+      .filter(Boolean); // remove undefined/null
+
+    if (numbers.length === 0) {
+      alert("No emergency contacts with phone numbers");
+      return;
+    }
+
+    // 5. Send SMS
+    const { result } = await SMS.sendSMSAsync(numbers, message);
+    console.log("SMS result:", result);
   };
 
   return (
-    <View style={styles.container}>
-      {/* Live Location Display */}
-      <View style={styles.locationContainer}>
-        <Text style={styles.locationTitle}>Your Live Location:</Text>
-        {errorMsg ? (
-          <Text style={styles.locationText}>{errorMsg}</Text>
-        ) : location ? (
-          <Text style={styles.locationText}>
-            Lat: {location.latitude.toFixed(4)} | Lon:{" "}
-            {location.longitude.toFixed(4)}
-          </Text>
-        ) : (
-          <Text style={styles.locationText}>Fetching location...</Text>
-        )}
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }} edges={["top"]}>
+      <StatusBar style="dark" backgroundColor="#fff" />
+      <View style={styles.container}>
+        <TouchableOpacity
+          style={styles.locationBox}
+          onPress={() => router.push("/map-view")}
+        >
+          <Text style={styles.locationLabel}>📍 You are here</Text>
+          {address ? (
+            <Text style={styles.coords}>{address}</Text>
+          ) : location ? (
+            <Text style={styles.coords}>
+              {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
+            </Text>
+          ) : (
+            <Text style={styles.coords}>Fetching location...</Text>
+          )}
+        </TouchableOpacity>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <TouchableOpacity onPress={handleSOS}>
+            <Image
+              source={require("../../assets/sos.png")}
+              style={styles.sosImage}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
-
-      {/* SOS Button */}
-      <TouchableOpacity style={styles.sosButton} onPress={handleSOSPress}>
-        <Image
-          source={require("../../assets/sos.png")} // your SOS image
-          style={styles.sosImage}
-        />
-      </TouchableOpacity>
-
-      {/* Instruction */}
-      <Text style={styles.instructionText}>
-        {"Press SOS if you're in danger."}
-      </Text>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -72,45 +108,40 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FF4A4D",
-    alignItems: "center",
-    justifyContent: "center",
     padding: 20,
-  },
-  locationContainer: {
-    position: "absolute",
-    top: 60,
+    justifyContent: "flex-start", // keep top content at top
     alignItems: "center",
   },
-  locationTitle: {
-    fontSize: 16,
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
     color: "#fff",
-    fontWeight: "600",
-    marginBottom: 5,
+    marginBottom: 20,
+    textAlign: "center",
   },
-  locationText: {
-    color: "#fff",
-    fontSize: 14,
-  },
-  sosButton: {
-    marginTop: -50,
-    width: 180,
-    height: 180,
-    borderRadius: 90,
+  locationBox: {
     backgroundColor: "#fff",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 14,
+    elevation: 4,
+    marginBottom: 30,
     alignItems: "center",
-    justifyContent: "center",
-    elevation: 8,
+  },
+  locationLabel: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#1d3557",
+  },
+  coords: {
+    fontSize: 13,
+    color: "#333",
+    marginTop: 4,
   },
   sosImage: {
-    width: 100,
-    height: 100,
-    resizeMode: "contain",
-  },
-  instructionText: {
-    marginTop: 40,
-    fontSize: 16,
-    color: "#fff",
-    textAlign: "center",
-    fontWeight: "500",
+    width: 200,
+    height: 200,
+    marginBottom: 20,
+    justifyContent: "center",
   },
 });
