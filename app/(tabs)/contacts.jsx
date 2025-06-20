@@ -145,6 +145,7 @@ export default function ContactsScreen() {
     };
     fetchSaved();
   }, []);
+
   const handleConfirmDelete = () => {
     const updated = selectedContacts.filter((c) => c.id !== contactToDelete.id);
     setSelectedContacts(updated);
@@ -175,6 +176,7 @@ export default function ContactsScreen() {
             keyExtractor={(item) => item.id}
             contentContainerStyle={{ paddingTop: 12 }}
             renderItem={({ item }) => (
+              <Pressable onLongPress={() => setContactToDelete(item)}>
               <View style={styles.card}>
                 <View style={styles.contactInfo}>
                   {/* Contact Image */}
@@ -210,6 +212,7 @@ export default function ContactsScreen() {
                   </TouchableOpacity>
                 </View>
               </View>
+              </Pressable>
             )}
           />
         )}
