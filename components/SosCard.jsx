@@ -8,7 +8,7 @@ export default function SosCard({ sos }) {
     <TouchableOpacity
       style={styles.card}
       onPress={() =>
-        router.push({ pathname: "/responder/detail", params: sos })
+        router.push({ pathname: "/(responder-pages)/details", params: sos })
       }
     >
       <Text style={styles.name}>{sos.name}</Text>

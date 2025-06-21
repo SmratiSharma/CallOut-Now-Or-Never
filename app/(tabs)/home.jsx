@@ -5,7 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useContacts } from "../context/ContactsContext"; // path may vary
+import { useContacts } from "../../context/ContactsContext"; // path may vary
 
 export default function HomeScreen() {
   const [location, setLocation] = useState(null);

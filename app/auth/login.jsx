@@ -8,10 +8,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useUser } from "../../context/UserContext"; // 🔁 Make sure path is correct
 import { account } from "../../lib/appwriteConfig";
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { setUser, setRole } = useUser(); // 👈 Add this
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -28,8 +31,23 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     try {
+      // Step 1: Login
       await account.createEmailPasswordSession(email, password);
-      router.replace("/(tabs)/home");
+
+      // Step 2: Fetch user info and preferences
+      const user = await account.get();
+      const prefs = await account.getPrefs();
+
+      // Step 3: Set context
+      setUser(user);
+      setRole(prefs.role);
+
+      // Step 4: Navigate based on role
+      if (prefs.role === "responder") {
+        router.replace("/responder");
+      } else {
+        router.replace("/(tabs)/home");
+      }
     } catch (error) {
       Alert.alert("Login Failed", error.message);
     }
@@ -62,7 +80,7 @@ export default function LoginScreen() {
       </TouchableOpacity>
 
       <Link style={styles.link} href="/auth/register">
-        {"Don't have an account, Register Instead?"}
+        {"Don't have an account? Register Instead"}
       </Link>
     </View>
   );

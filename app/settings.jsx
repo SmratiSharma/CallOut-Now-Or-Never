@@ -9,6 +9,7 @@ export default function SettingsScreen() {
   const handleLogout = async () => {
   try {
     await account.deleteSession("current");
+    console.log("Successfully logged out");
     router.replace("/"); // back to landing screen
   } catch (error) {
     console.log("Logout Error:", error.message);
