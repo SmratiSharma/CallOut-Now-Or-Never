@@ -1,7 +1,27 @@
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { account } from "../../lib/appwriteConfig";
 
 export default function ResponderLayout() {
+  const router = useRouter();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        await account.get(); // Check if user is authenticated
+      } catch {
+        router.replace("/auth/login"); // Redirect if not logged in
+      } finally {
+        setChecking(false);
+      }
+    };
+
+    checkSession();
+  }, []);
+
+  if (checking) return null; // You can add a loader here
   return (
     <Tabs
       screenOptions={{

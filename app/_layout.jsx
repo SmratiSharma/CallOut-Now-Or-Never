@@ -18,19 +18,9 @@ function AuthLoader() {
         const prefs = await account.getPrefs();
 
         setUser(user);
-        const role = prefs.role ?? "reporter";
-        setRole(role);
-
-        if (!redirected) {
-          if (role === "responder") {
-            router.replace("/responder");
-          } else {
-            router.replace("/(tabs)/home");
-          }
-          setRedirected(true); // ✅ prevent re-navigation
-        }
+        setRole(prefs.role ?? "reporter");
       } catch (err) {
-        router.replace("/auth/login"); // fallback
+        console.log("❌ Not logged in:", err.message);
       } finally {
         setLoading(false);
       }

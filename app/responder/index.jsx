@@ -1,4 +1,5 @@
 import { FlatList, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import SosCard from "../../components/SosCard";
 
 const dummyData = [
@@ -8,14 +9,16 @@ const dummyData = [
 
 export default function ResponderHomeScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Nearby SOS Calls</Text>
-      <FlatList
-        data={dummyData}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <SosCard sos={item} />}
-      />
-    </View>
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <Text style={styles.heading}>Nearby SOS Calls</Text>
+        <FlatList
+          data={dummyData}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <SosCard sos={item} />}
+        />
+      </View>
+    </SafeAreaView>
   );
 }
 

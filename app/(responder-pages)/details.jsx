@@ -1,27 +1,41 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Button, Linking, StyleSheet, Text, View } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Button,
+  TouchableOpacity,
+  Linking,
+  Platform,
+  SafeAreaView,
+} from "react-native";
 import MapView, { Marker } from "react-native-maps";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function ResponderDetailScreen() {
   const { name, distance, time } = useLocalSearchParams();
   const router = useRouter();
 
-  // Dummy victim location (you'll replace with dynamic coordinates later)
-  const victimLat = 28.6139;
-  const victimLng = 77.209;
+  const responderLat = 28.6139;
+  const responderLng = 77.209;
 
   const openGoogleMaps = () => {
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${victimLat},${victimLng}`;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${responderLat},${responderLng}`;
     Linking.openURL(url);
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safeArea}>
+      {/* Back Arrow */}
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <Ionicons name="arrow-back" size={28} color="#1d3557" />
+      </TouchableOpacity>
+
       <Text style={styles.title}>SOS Detail</Text>
 
-      <View style={styles.infoCard}>
+      <View style={styles.detailCard}>
         <Text style={styles.label}>
-          Victim Name: <Text style={styles.value}>{name}</Text>
+          Responder: <Text style={styles.value}>{name}</Text>
         </Text>
         <Text style={styles.label}>
           Distance: <Text style={styles.value}>{distance}</Text>
@@ -31,52 +45,112 @@ export default function ResponderDetailScreen() {
         </Text>
       </View>
 
-      <MapView
-        style={styles.map}
-        initialRegion={{
-          latitude: victimLat,
-          longitude: victimLng,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }}
-      >
-        <Marker
-          coordinate={{ latitude: victimLat, longitude: victimLng }}
-          title="Victim Location"
-        />
-      </MapView>
-
-      <View style={styles.buttonContainer}>
-        <Button title="Navigate in Google Maps" onPress={openGoogleMaps} />
-        <View style={{ marginTop: 10 }} />
-        <Button title="Go Back" onPress={() => router.back()} />
+      {/* Map Card */}
+      <View style={styles.mapCard}>
+        <MapView
+          style={styles.map}
+          initialRegion={{
+            latitude: responderLat,
+            longitude: responderLng,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }}
+        >
+          <Marker
+            coordinate={{ latitude: responderLat, longitude: responderLng }}
+            title="Responder Location"
+          />
+        </MapView>
       </View>
-    </View>
+
+      {/* Buttons */}
+      <View style={styles.buttonRow}>
+        <TouchableOpacity style={styles.buttonPrimary} onPress={openGoogleMaps}>
+          <Text style={styles.buttonText}>📍 Navigate</Text>
+        </TouchableOpacity>
+
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
-  infoCard: {
-    backgroundColor: "#f9f9f9",
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 20,
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#f8f9fa",
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === "android" ? 40 : 20,
+  },
+  backButton: {
+    position: "absolute",
+    top: Platform.OS === "android" ? 40 : 20,
+    left: 16,
+    zIndex: 10,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#1d3557",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  detailCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 10,
+    elevation: 3,
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
-    elevation: 3,
   },
-  label: { fontSize: 18, marginTop: 10 },
-  value: { fontWeight: "600" },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+    color: "#555",
+  },
+  value: {
+    fontWeight: "600",
+    color: "#000",
+  },
+  mapCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    overflow: "hidden",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    marginVertical: 20,
+    height: 300,
+  },
   map: {
-    height: 250,
-    width: "100%",
-    borderRadius: 10,
+    flex: 1,
   },
-  buttonContainer: {
-    marginTop: 30,
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  buttonPrimary: {
+    flex: 1,
+    backgroundColor: "#1d3557",
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  buttonSecondary: {
+    flex: 1,
+    backgroundColor: "#457b9d",
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

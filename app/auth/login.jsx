@@ -19,14 +19,25 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    account
-      .get()
-      .then((user) => {
-        console.log("Already logged in as:", user);
-      })
-      .catch((err) => {
-        console.log("Not logged in:", err.message);
-      });
+    const checkIfLoggedIn = async () => {
+      console.log("🔍 [Login Screen] Checking session…");
+      try {
+        const user = await account.get();
+        const prefs = await account.getPrefs();
+        console.log("✅ Logged-in user:", user.email, "| Role:", prefs.role);
+
+        if (prefs.role === "responder") {
+          console.log("→ Redirecting to /responder");
+          router.replace("/responder");
+        } else {
+          console.log("→ Redirecting to /(tabs)/home");
+          router.replace("/(tabs)/home");
+        }
+      } catch {
+        console.log("🚫 Not logged in — staying on login");
+      }
+    };
+    checkIfLoggedIn();
   }, []);
 
   const handleLogin = async () => {

@@ -1,8 +1,8 @@
-import { useNavigation } from "expo-router";
+import { useRouter } from "expo-router";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function LandingScreen() {
-  const navigation = useNavigation();
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
@@ -19,7 +19,7 @@ export default function LandingScreen() {
       {/* Login Button */}
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate("auth/login")}
+        onPress={() => router.replace("/auth/login")}
       >
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
@@ -27,7 +27,7 @@ export default function LandingScreen() {
       {/* Register Button */}
       <TouchableOpacity
         style={[styles.button, styles.registerButton]}
-        onPress={() => navigation.navigate("auth/register")}
+        onPress={() => router.replace("/auth/register")}
       >
         <Text style={styles.buttonText}>Register</Text>
       </TouchableOpacity>
