@@ -47,7 +47,7 @@ export default function ResponderHomeScreen() {
             {
               latitude,
               longitude,
-              timestamp: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
             }
           );
         } else {
