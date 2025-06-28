@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useContacts } from "../../context/ContactsContext"; // path may vary
+import { ID, databases } from "../../lib/appwriteConfig";
 
 export default function HomeScreen() {
   const [location, setLocation] = useState(null);
@@ -28,11 +29,56 @@ export default function HomeScreen() {
       // Reverse Geocoding
       let addressData = await Location.reverseGeocodeAsync(locationData.coords);
       if (addressData.length > 0) {
-        const { name, street, city, district } = addressData[0];
-        setAddress(`${name || street}, ${district || city}`);
+        const { locationName, street, city, district } = addressData[0];
+        setAddress(`${locationName || street}, ${district || city}`);
+      }
+
+      const { latitude, longitude } = locationData.coords;
+
+      try {
+        const userId = user?.$id;
+        const name = user?.name;
+
+        if (!userId || !name) return;
+
+        const existing = await databases.listDocuments(
+          "68597f2c001c5885e909",
+          "685e891f00114175fde3",
+          [Query.equal("userId", userId)]
+        );
+
+        if (existing.total > 0) {
+          await databases.updateDocument(
+            "68597f2c001c5885e909",
+            "685e891f00114175fde3",
+            existing.documents[0].$id,
+            {
+              latitude,
+              longitude,
+              updatedAt: new Date().toISOString(),
+            }
+          );
+        } else {
+          await databases.createDocument(
+            "68597f2c001c5885e909",
+            "685e891f00114175fde3",
+            ID.unique(),
+            {
+              userId,
+              name,
+              latitude,
+              longitude,
+              updatedAt: new Date().toISOString(),
+            }
+          );
+        }
+
+        console.log("Location saved", latitude, longitude);
+      } catch (error) {
+        console.log("FAiled to save location", error);
       }
     })();
-  }, []);
+  }, [user]);
 
   const handleSOS = async () => {
     // 1. Ask for location permission
