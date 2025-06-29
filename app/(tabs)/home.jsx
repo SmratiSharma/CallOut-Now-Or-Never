@@ -1,3 +1,4 @@
+import { Query } from "appwrite";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import * as SMS from "expo-sms";
@@ -6,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useContacts } from "../../context/ContactsContext"; // path may vary
+import { useUser } from "../../context/UserContext";
 import { ID, databases } from "../../lib/appwriteConfig";
 
 export default function HomeScreen() {
@@ -14,6 +16,7 @@ export default function HomeScreen() {
   const [errorMsg, setErrorMsg] = useState(null);
   const { selectedContacts, setSelectedContacts, saveContacts } = useContacts();
   const router = useRouter();
+  const { user } = useUser();
 
   useEffect(() => {
     (async () => {
@@ -34,51 +37,8 @@ export default function HomeScreen() {
       }
 
       const { latitude, longitude } = locationData.coords;
-
-      try {
-        const userId = user?.$id;
-        const name = user?.name;
-
-        if (!userId || !name) return;
-
-        const existing = await databases.listDocuments(
-          "68597f2c001c5885e909",
-          "685e891f00114175fde3",
-          [Query.equal("userId", userId)]
-        );
-
-        if (existing.total > 0) {
-          await databases.updateDocument(
-            "68597f2c001c5885e909",
-            "685e891f00114175fde3",
-            existing.documents[0].$id,
-            {
-              latitude,
-              longitude,
-              updatedAt: new Date().toISOString(),
-            }
-          );
-        } else {
-          await databases.createDocument(
-            "68597f2c001c5885e909",
-            "685e891f00114175fde3",
-            ID.unique(),
-            {
-              userId,
-              name,
-              latitude,
-              longitude,
-              updatedAt: new Date().toISOString(),
-            }
-          );
-        }
-
-        console.log("Location saved", latitude, longitude);
-      } catch (error) {
-        console.log("FAiled to save location", error);
-      }
     })();
-  }, [user]);
+  }, []);
 
   const handleSOS = async () => {
     // 1. Ask for location permission
@@ -114,6 +74,50 @@ export default function HomeScreen() {
     // 5. Send SMS
     const { result } = await SMS.sendSMSAsync(numbers, message);
     console.log("SMS result:", result);
+
+    //code to save location in collection
+    try {
+      const userId = user?.$id;
+      const name = user?.name;
+
+      if (!userId || !name) return;
+
+      const existing = await databases.listDocuments(
+        "68597f2c001c5885e909",
+        "685e891f00114175fde3",
+        [Query.equal("userId", userId)]
+      );
+
+      if (existing.total > 0) {
+        await databases.updateDocument(
+          "68597f2c001c5885e909",
+          "685e891f00114175fde3",
+          existing.documents[0].$id,
+          {
+            latitude,
+            longitude,
+            updatedAt: new Date().toISOString(),
+          }
+        );
+      } else {
+        await databases.createDocument(
+          "68597f2c001c5885e909",
+          "685e891f00114175fde3",
+          ID.unique(),
+          {
+            userId,
+            name,
+            latitude,
+            longitude,
+            updatedAt: new Date().toISOString(),
+          }
+        );
+      }
+
+      console.log("Location saved", latitude, longitude);
+    } catch (error) {
+      console.log("FAiled to save location", error);
+    }
   };
 
   return (
