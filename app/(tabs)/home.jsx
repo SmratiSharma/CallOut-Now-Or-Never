@@ -40,7 +40,7 @@ export default function HomeScreen() {
     })();
   }, []);
 
-  const handleSOS = async () => {
+  const sendSms = async () => {
     // 1. Ask for location permission
     const { status } = await Location.requestForegroundPermissionsAsync();
 
@@ -76,6 +76,53 @@ export default function HomeScreen() {
     console.log("SMS result:", result);
 
     //code to save location in collection
+    // try {
+    //   const userId = user?.$id;
+    //   const name = user?.name;
+
+    //   if (!userId || !name) return;
+
+    //   const existing = await databases.listDocuments(
+    //     "68597f2c001c5885e909",
+    //     "685e891f00114175fde3",
+    //     [Query.equal("userId", userId)]
+    //   );
+
+    //   if (existing.total > 0) {
+    //     await databases.updateDocument(
+    //       "68597f2c001c5885e909",
+    //       "685e891f00114175fde3",
+    //       existing.documents[0].$id,
+    //       {
+    //         latitude,
+    //         longitude,
+    //         updatedAt: new Date().toISOString(),
+    //       }
+    //     );
+    //   } else {
+    //     await databases.createDocument(
+    //       "68597f2c001c5885e909",
+    //       "685e891f00114175fde3",
+    //       ID.unique(),
+    //       {
+    //         userId,
+    //         name,
+    //         latitude,
+    //         longitude,
+    //         updatedAt: new Date().toISOString(),
+    //       }
+    //     );
+    //   }
+
+    //   console.log("Location saved", latitude, longitude);
+    // } catch (error) {
+    //   console.log("FAiled to save location", error);
+    // }
+  };
+
+  const saveLocation = async () => {
+    const location = await Location.getCurrentPositionAsync({});
+    const { latitude, longitude } = location.coords;
     try {
       const userId = user?.$id;
       const name = user?.name;
@@ -120,6 +167,11 @@ export default function HomeScreen() {
     }
   };
 
+  const handleSosPress = async () => {
+    await saveLocation();
+    sendSms();
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }} edges={["top"]}>
       <StatusBar style="dark" backgroundColor="#fff" />
@@ -142,7 +194,7 @@ export default function HomeScreen() {
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
-          <TouchableOpacity onPress={handleSOS}>
+          <TouchableOpacity onPress={handleSosPress}>
             <Image
               source={require("../../assets/sos.png")}
               style={styles.sosImage}

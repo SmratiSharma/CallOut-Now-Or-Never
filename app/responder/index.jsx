@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SosCard from "../../components/SosCard";
-import { databases, ID } from "../../lib/appwriteConfig";
-
 import { useUser } from "../../context/UserContext";
+import { databases, ID } from "../../lib/appwriteConfig";
 const dummyData = [
   { id: "1", name: "Anonymous", distance: "250m", time: "1 min ago" },
   { id: "2", name: "Neha Sharma", distance: "700m", time: "3 min ago" },
@@ -73,6 +72,10 @@ export default function ResponderHomeScreen() {
 
     if (user) saveResponderLocation();
   }, [user]);
+
+  useEffect(async ()=>{
+    const response = await databases.listDocuments("68597f2c001c5885e909","685e891f00114175fde3");
+  })
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
