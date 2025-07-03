@@ -13,6 +13,8 @@ const dummyData = [
 
 export default function ResponderHomeScreen() {
   const [location, setLocation] = useState(null);
+  const [nearbySosCalls, setNearbySosCalls] = useState([]);
+
   const { user } = useUser();
 
   useEffect(() => {
@@ -73,9 +75,58 @@ export default function ResponderHomeScreen() {
     if (user) saveResponderLocation();
   }, [user]);
 
-  useEffect(async ()=>{
-    const response = await databases.listDocuments("68597f2c001c5885e909","685e891f00114175fde3");
-  })
+  const getDistanceInKm = (
+    responderLat,
+    responderLng,
+    reporterLat,
+    reporterLng
+  ) => {
+    const toRad = (deg) => (deg * Math.PI) / 180.0;
+
+    const dLat = toRad(reporterLat - responderLat);
+    const dLon = toRad(reporterLng - responderLng);
+
+    const lat1Rad = toRad(responderLat);
+    const lat2Rad = toRad(reporterLat);
+
+    const a =
+      Math.pow(Math.sin(dLat / 2), 2) +
+      Math.pow(Math.sin(dLon / 2), 2) * Math.cos(lat1Rad) * Math.cos(lat2Rad);
+
+    const earthRadius = 6371; // in kilometers
+    const c = 2 * Math.asin(Math.sqrt(a));
+    return earthRadius * c;
+  };
+
+  useEffect(() => {
+    if (!location) return;
+    const fetchData = async () => {
+      const response = await databases.listDocuments(
+        "68597f2c001c5885e909",
+        "685e891f00114175fde3"
+      );
+      const nearbySOS = response.documents;
+      const responderLat = location.coords.latitude;
+      const responderLng = location.coords.longitude;
+
+      nearbySOS.filter((data) => {
+        const reporterLat = data.latitude;
+        const reporterLng = data.longitude;
+
+        const distance = getDistanceInKm(
+          responderLat,
+          responderLng,
+          reporterLat,
+          reporterLng
+        );
+
+        return distance<=2;
+      });
+      setNearbySosCalls(nearbySOS);
+
+    };
+    fetchData();
+  }, [location]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
